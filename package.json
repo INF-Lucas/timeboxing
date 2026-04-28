@@ -1,6 +1,6 @@
 {
   "name": "timeboxing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local-first timeboxing app inspired by Timeboxing by Marc Zao-Sanders.",
   "private": false,
   "author": "INF-Lucas",

@@ -2,6 +2,7 @@
 
 import AppLayout from '../components/AppLayout';
 import { useDate } from '../components/DateProvider';
+import { useI18n } from '../components/I18nProvider';
 import { useEffect, useMemo, useState } from 'react';
 import type { Box } from '@/lib/types';
 import { getBoxesForDay, markMissedForDay, shiftBox, deleteBox } from '@/lib/actions/boxes';
@@ -16,6 +17,7 @@ export default function ReviewPage() {
 
 function ReviewPageContent() {
   const { selectedDate, formatForInput } = useDate();
+  const { t } = useI18n();
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -36,7 +38,7 @@ function ReviewPageContent() {
       const changed = await markMissedForDay(selectedDate);
       const rows = await getBoxesForDay(selectedDate);
       setBoxes(rows);
-      if (changed > 0) showToast(`已标记 ${changed} 项为未完成`);
+      if (changed > 0) showToast(t('review.toast.markedMissed', { count: changed }));
     } finally {
       setBusy(false);
     }
@@ -81,7 +83,7 @@ function ReviewPageContent() {
         }
       }
       await refresh();
-      showToast(`已顺延 ${ok} 项；失败 ${fail} 项`);
+      showToast(t('review.toast.snoozed', { ok, fail }));
     } finally {
       setBusy(false);
     }
@@ -93,9 +95,9 @@ function ReviewPageContent() {
     try {
       await shiftBox(id);
       await refresh();
-      showToast('已顺延 1 项');
+      showToast(t('review.toast.snoozedOne'));
     } catch {
-      showToast('顺延失败 1 项');
+      showToast(t('review.toast.snoozeFailedOne'));
     } finally {
       setBusy(false);
     }
@@ -103,15 +105,15 @@ function ReviewPageContent() {
 
   // 新增：删除未完成项
   async function deleteOne(id: string) {
-    const ok = window.confirm('确定删除此未完成项？');
+    const ok = window.confirm(t('review.confirm.deleteMissed'));
     if (!ok) return;
     setBusy(true);
     try {
       await deleteBox(id);
       await refresh();
-      showToast('已删除 1 项');
+      showToast(t('review.toast.deletedOne'));
     } catch {
-      showToast('删除失败 1 项');
+      showToast(t('review.toast.deleteFailedOne'));
     } finally {
       setBusy(false);
     }
@@ -122,15 +124,17 @@ function ReviewPageContent() {
       <div className="h-full flex flex-col min-h-0 overflow-hidden">
         {/* 顶部固定区：标题/日期/操作/指标卡片 */}
         <div className="shrink-0">
-          <h1 className="text-2xl font-semibold mb-2">Review 复盘</h1>
-          <p className="text-sm text-gray-600">当前日期：{formatForInput(selectedDate)}</p>
+          <h1 className="text-2xl font-semibold mb-2">{t('review.title')}</h1>
+          <p className="text-sm text-gray-600">
+            {t('common.currentDate', { date: formatForInput(selectedDate) })}
+          </p>
           <div className="mt-2 flex gap-2">
             <button
               className="px-3 py-1 text-sm rounded-full bg-purple-800 text-white disabled:opacity-50"
               onClick={refresh}
               disabled={busy}
             >
-              刷新
+              {t('common.refresh')}
             </button>
           </div>
           {toast ? (
@@ -142,23 +146,25 @@ function ReviewPageContent() {
           {/* 指标卡片 */}
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="border rounded-2xl bg-yellow-50/30 p-3">
-              <div className="text-xs text-gray-500">已计划盒子</div>
+              <div className="text-xs text-gray-500">{t('review.card.planned')}</div>
               <div className="text-lg font-semibold">{planned.length}</div>
-              <div className="text-xs text-gray-500 mt-1">{plannedMin} 分钟</div>
+              <div className="text-xs text-gray-500 mt-1">{plannedMin} {t('common.minuteUnit')}</div>
             </div>
             <div className="border rounded-2xl bg-yellow-50/30 p-3">
-              <div className="text-xs text-gray-500">已完成盒子</div>
+              <div className="text-xs text-gray-500">{t('review.card.done')}</div>
               <div className="text-lg font-semibold">{done.length}</div>
-              <div className="text-xs text-gray-500 mt-1">{doneMin} 分钟</div>
+              <div className="text-xs text-gray-500 mt-1">{doneMin} {t('common.minuteUnit')}</div>
             </div>
             <div className="border rounded-2xl bg-yellow-50/30 p-3">
-              <div className="text-xs text-gray-500">效率（完成/计划）</div>
+              <div className="text-xs text-gray-500">{t('review.card.efficiency')}</div>
               <div className="text-lg font-semibold">{efficiencyPct}%</div>
             </div>
             <div className="border rounded-2xl bg-yellow-50/30 p-4">
-              <div className="text-xs text-gray-500">进行中</div>
+              <div className="text-xs text-gray-500">{t('review.card.active')}</div>
               <div className="text-lg font-semibold">{active.length}</div>
-              <div className="text-xs text-gray-500 mt-1">{active.length > 0 ? '正在推进' : '空闲中'}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {active.length > 0 ? t('review.card.working') : t('review.card.idle')}
+              </div>
             </div>
           </div>
       </div>
@@ -170,10 +176,10 @@ function ReviewPageContent() {
           className="border rounded-2xl bg-yellow-50/30 p-3 flex flex-col min-h-0"
           style={{ flexGrow: growDone, minHeight: SECTION_MIN_PX }}
         >
-          <div className="font-medium mb-2 shrink-0">今日已完成</div>
+          <div className="font-medium mb-2 shrink-0">{t('review.section.done')}</div>
           <div className="flex-1 min-h-0 overflow-y-auto">
             {done.length === 0 ? (
-              <div className="text-sm text-gray-500">暂无完成记录。</div>
+              <div className="text-sm text-gray-500">{t('review.empty.done')}</div>
             ) : (
               <ul className="space-y-2">
                 {done.map((b) => (
@@ -181,11 +187,11 @@ function ReviewPageContent() {
                     <div className="min-w-0">
                       <div className="text-sm truncate">{b.title}</div>
                       <div className="text-xs text-gray-500">
-                        {fmtHM(b.start)} — {fmtHM(b.end)}（{diffMin(b.start, b.end)} 分钟）
+                        {fmtHM(b.start)} — {fmtHM(b.end)} ({diffMin(b.start, b.end)} {t('common.minuteUnit')})
                       </div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-400/30">
-                      已完成
+                      {t('status.done')}
                     </span>
                   </li>
                 ))}
@@ -200,19 +206,19 @@ function ReviewPageContent() {
           style={{ flexGrow: growMissed, minHeight: SECTION_MIN_PX }}
         >
           <div className="flex items-center justify-between mb-2 shrink-0">
-            <div className="font-medium">今日未完成（超时）</div>
+            <div className="font-medium">{t('review.section.missed')}</div>
             <button
               className="px-3 py-1 text-sm rounded-full bg-amber-500 text-white disabled:opacity-50"
               onClick={snoozeAllMissed}
               disabled={busy || missed.length === 0}
-              title="将今日未完成盒子移到下一空窗"
+              title={t('review.snoozeAllTitle')}
             >
-              一键顺延全部
+              {t('review.snoozeAll')}
             </button>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto">
             {missed.length === 0 ? (
-              <div className="text-sm text-gray-500">暂无未完成记录。</div>
+              <div className="text-sm text-gray-500">{t('review.empty.missed')}</div>
             ) : (
               <ul className="space-y-2">
                 {missed.map((b) => (
@@ -220,28 +226,28 @@ function ReviewPageContent() {
                     <div className="min-w-0">
                       <div className="text-sm truncate">{b.title}</div>
                       <div className="text-xs text-gray-500">
-                        {fmtHM(b.start)} — {fmtHM(b.end)}（{diffMin(b.start, b.end)} 分钟）
+                        {fmtHM(b.start)} — {fmtHM(b.end)} ({diffMin(b.start, b.end)} {t('common.minuteUnit')})
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-400/10 text-rose-700 ring-1 ring-rose-400/30">
-                        未完成
+                        {t('status.missed')}
                       </span>
                       <button 
                         className="px-2 py-0.5 text-[11px] rounded-full bg-amber-500 text-white disabled:opacity-50"
                         onClick={() => snoozeOne(b.id)}
                         disabled={busy}
-                        title="顺延到下一空窗"
+                        title={t('review.snoozeAllTitle')}
                       >
-                        顺延
+                        {t('common.snooze')}
                       </button>
                       <button 
                         className="px-2 py-0.5 text-[11px] rounded-full bg-rose-600 text-white disabled:opacity-50"
                         onClick={() => deleteOne(b.id)}
                         disabled={busy}
-                        title="删除此未完成项"
+                        title={t('review.deleteMissedTitle')}
                       >
-                        删除
+                        {t('common.delete')}
                       </button>
                     </div>
                   </li>
@@ -256,10 +262,10 @@ function ReviewPageContent() {
           className="border rounded-2xl bg-yellow-50/30 p-3 flex flex-col min-h-0"
           style={{ flexGrow: growPlanned, minHeight: SECTION_MIN_PX }}
         >
-          <div className="font-medium mb-2 shrink-0">今日已计划</div>
+          <div className="font-medium mb-2 shrink-0">{t('review.section.planned')}</div>
           <div className="flex-1 min-h-0 overflow-y-auto">
             {planned.length === 0 ? (
-              <div className="text-sm text-gray-500">今日暂无计划盒子。</div>
+              <div className="text-sm text-gray-500">{t('review.empty.planned')}</div>
             ) : (
               <ul className="space-y-2">
                 {planned.map((b) => (
@@ -267,11 +273,11 @@ function ReviewPageContent() {
                     <div className="min-w-0">
                       <div className="text-sm truncate">{b.title}</div>
                       <div className="text-xs text-gray-500">
-                        {fmtHM(b.start)} — {fmtHM(b.end)}（{diffMin(b.start, b.end)} 分钟）
+                        {fmtHM(b.start)} — {fmtHM(b.end)} ({diffMin(b.start, b.end)} {t('common.minuteUnit')})
                       </div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-700 ring-1 ring-amber-400/30">
-                      已计划
+                      {t('status.planned')}
                     </span>
                   </li>
                 ))}

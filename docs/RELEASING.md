@@ -62,26 +62,25 @@ git push -u origin main
 Release 标题：
 
 ```text
-Timeboxing 1.0.0
+Timeboxing 1.0.1
 ```
 
 Release notes：
 
 ```text
-Initial open-source release of Timeboxing.
+Timeboxing 1.0.1
 
-- Local-first timeboxing workflow
-- Plan, Focus, Review, and Settings pages
-- IndexedDB storage with JSON export/import
-- Electron macOS packaging
-- Bilingual Chinese/English documentation
-- MIT License
+- Added in-app System/Chinese/English language setting
+- Localized main pages, calendar actions, prompts, and Settings UI
+- Updated bilingual documentation for language settings
+- Unified home entry button widths for a cleaner layout
 ```
 
 ### 发布前检查清单
 
 - README 中英文内容可读。
 - 用户手册覆盖所有页面。
+- 应用内语言设置可在跟随系统、中文和 English 之间切换。
 - 本地存储说明和当前 schema 一致。
 - `npm run lint` 通过。
 - `npm run build-static` 通过。
@@ -148,26 +147,25 @@ If you use a different repository name, update these first:
 Release title:
 
 ```text
-Timeboxing 1.0.0
+Timeboxing 1.0.1
 ```
 
 Release notes:
 
 ```text
-Initial open-source release of Timeboxing.
+Timeboxing 1.0.1
 
-- Local-first timeboxing workflow
-- Plan, Focus, Review, and Settings pages
-- IndexedDB storage with JSON export/import
-- Electron macOS packaging
-- Bilingual Chinese/English documentation
-- MIT License
+- Added in-app System/Chinese/English language setting
+- Localized main pages, calendar actions, prompts, and Settings UI
+- Updated bilingual documentation for language settings
+- Unified home entry button widths for a cleaner layout
 ```
 
 ### Pre-release Checklist
 
 - README is readable in both Chinese and English.
 - The user guide covers every page.
+- The in-app language setting switches between System, Chinese, and English.
 - Local storage documentation matches the current schema.
 - `npm run lint` passes.
 - `npm run build-static` passes.

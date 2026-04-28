@@ -1,5 +1,6 @@
 export type BoxStatus = 'planned' | 'active' | 'done' | 'missed';
 export type EnergyLevel = 'low' | 'medium' | 'high';
+export type LanguagePreference = 'system' | 'zh-CN' | 'en-US';
 
 export interface Box {
   id: string;
@@ -56,4 +57,5 @@ export interface Settings {
   workday_end: string;   // 'HH:MM'
   colors_by_tag?: Record<string, string>;
   calendar_integration_enabled?: boolean;
+  language?: LanguagePreference;
 }

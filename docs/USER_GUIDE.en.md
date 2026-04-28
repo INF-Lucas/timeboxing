@@ -11,32 +11,33 @@ This guide explains every page in the open-source Timeboxing app, what each page
 - Status: `planned`, `active`, `done`, or `missed`.
 - Urgency: set through tags. The UI supports `urgent`, `important`, and `normal`, shown through card colors.
 - Local data: all data is stored in IndexedDB on the current device by default.
+- Language: choose `System`, `中文`, or `English` from Settings. The UI updates immediately.
 
 ## Recommended Workflow
 
-1. Open `Settings 设置` and confirm your workday start and end time.
-2. Open `Plan 计划`, add backlog items, and set estimated minutes.
-3. Select backlog items, set urgency, then click `安排到今天`.
+1. Open `Settings` and confirm language, workday start, and workday end.
+2. Open `Plan`, add backlog items, and set estimated minutes.
+3. Select backlog items, set urgency, then click `Today`.
 4. Review the calendar and drag or resize timeboxes as needed.
-5. Open `Focus 执行` and start the current timebox.
-6. At the end of the day, open `Review 复盘` and handle missed items.
-7. Export a JSON backup from `Settings 设置 -> 本地数据` regularly.
+5. Open `Focus` and start the current timebox.
+6. At the end of the day, open `Review` and handle missed items.
+7. Export a JSON backup from `Settings -> Local Data` regularly.
 
 ## Global Layout
 
 ### Top Date Bar
 
-- The `日期` input changes the currently selected date.
+- The `Date` input changes the currently selected date.
 - Supported range: `2000-01-01` to `2099-12-31`.
-- `今天` jumps back to today.
-- The selected date affects `Plan 计划`, `Focus 执行`, `Review 复盘`, and `Settings 设置`.
+- `Today` jumps back to today.
+- The selected date affects `Plan`, `Focus`, `Review`, and `Settings`.
 
 ### Sidebar
 
-- `Plan 计划`: create backlog items, schedule timeboxes, and adjust the calendar.
-- `Focus 执行`: start and progress the current timebox.
-- `Review 复盘`: review completed, missed, planned, and active work.
-- `Settings 设置`: configure work hours, focus shield, and local data.
+- `Plan`: create backlog items, schedule timeboxes, and adjust the calendar.
+- `Focus`: start and progress the current timebox.
+- `Review`: review completed, missed, planned, and active work.
+- `Settings`: configure work hours, focus shield, language, and local data.
 
 ## Home
 
@@ -44,10 +45,10 @@ Route: `/`
 
 The home page provides four quick links:
 
-- `开始计划`: open `Plan 计划`.
-- `专注模式`: open `Focus 执行`.
-- `回顾总结`: open `Review 复盘`.
-- `设置`: open `Settings 设置`.
+- `Plan`: open `Plan`.
+- `Focus`: open `Focus`.
+- `Review`: open `Review`.
+- `Settings`: open `Settings`.
 
 The home page does not store data. It is a navigation entry.
 
@@ -61,10 +62,10 @@ The Plan page is the main workspace. It has three areas: backlog on the left, ca
 
 If the selected date does not have a planning box, the page shows a prompt:
 
-- `创建计划盒`: create a "制定今日计划" box at the workday start time.
-- `今日忽略`: hide the prompt without creating a planning box.
+- `Create`: create a `Daily Planning` box at the workday start time.
+- `Skip`: hide the prompt without creating a planning box.
 
-The planning box duration comes from `Settings 设置 -> 每日计划时长（分钟）`.
+The planning box duration comes from `Settings -> Plan Minutes`.
 
 ### Backlog
 
@@ -72,15 +73,15 @@ The left panel manages tasks that have not been scheduled.
 
 Available actions:
 
-- Enter a title and estimated minutes, then click `添加`.
+- Enter a title and estimated minutes, then click `Add`.
 - Estimated minutes must be between `5` and `480`.
-- Select multiple items and click `重要`, `紧急`, or `一般` to batch set urgency.
-- Select multiple items and click `安排到今天` to schedule them into available slots.
-- Select multiple items and click `批量删除` to delete them.
-- Click a backlog row to show `编辑` and `删除`.
+- Select multiple items and click `Imp`, `Urg`, or `Norm` to batch set urgency.
+- Select multiple items and click `Today` to schedule them into available slots.
+- Select multiple items and click `Del Batch` to delete them.
+- Click a backlog row to show `Edit` and `Del`.
 - Edit mode lets you update the title and estimated minutes.
 
-Backlog items are displayed by Chinese pinyin and numeric order. When scheduling selected items, more urgent items are arranged earlier.
+Backlog items are sorted by the current interface language and numeric order. When scheduling selected items, more urgent items are arranged earlier.
 
 ### Backlog Shortcuts
 
@@ -119,9 +120,9 @@ Available actions:
 
 Conflict options:
 
-- `移到下一空窗`: move to the next available slot.
-- `仍然保存`: save the overlapping time.
-- `取消`: discard the adjustment.
+- `Next Slot`: move to the next available slot.
+- `Save`: save the overlapping time.
+- `Cancel`: discard the adjustment.
 
 ### Calendar Card Actions
 
@@ -155,17 +156,17 @@ Editable fields:
 - Title.
 - Tags, separated by spaces.
 - Notes.
-- Urgency: `重要`, `紧急`, `一般`.
+- Urgency: `Imp`, `Urg`, `Norm`.
 
-After editing title, tags, or notes, click `保存属性`. The button is disabled when nothing changed.
+After editing title, tags, or notes, click `Save`. The button is disabled when nothing changed.
 
 Status actions:
 
-- `开始`: change a planned box to active.
-- `完成`: change a box to done.
-- `删除`: delete the timebox.
-- `顺延`: move it to the next free slot.
-- `分割`: split an active timebox into a completed part and a remaining planned part.
+- `Start`: change a planned box to active.
+- `Done`: change a box to done.
+- `Del`: delete the timebox.
+- `Later`: move it to the next free slot.
+- `Split`: split an active timebox into a completed part and a remaining planned part.
 
 ## Focus
 
@@ -183,15 +184,15 @@ Depending on the selected date and current time, the page shows:
 
 Available actions:
 
-- `开始`: start the due or next planned timebox.
-- `顺延`: move that timebox to the next free slot.
+- `Start`: start the due or next planned timebox.
+- `Later`: move that timebox to the next free slot.
 
 ### When A Timebox Is Active
 
 Available actions:
 
-- `完成`: mark it done.
-- `分割`: mark the elapsed part done and schedule the remaining duration into the next free slot.
+- `Done`: mark it done.
+- `Split`: mark the elapsed part done and schedule the remaining duration into the next free slot.
 
 ### Focus Shortcuts
 
@@ -203,13 +204,13 @@ Available actions:
 
 If extending creates an overlap, the page shows conflict options:
 
-- `仍然延长`
-- `移到下一空窗`
-- `取消`
+- `Keep +Xm`
+- `Next Slot`
+- `Cancel`
 
 ### Focus Shield
 
-When `Settings 设置 -> 专注保护` is enabled and a timebox is active:
+When `Settings -> Focus Shield` is enabled and a timebox is active:
 
 - A focus shield notice appears.
 - Some notifications and shortcuts are suppressed.
@@ -219,16 +220,16 @@ When `Settings 设置 -> 专注保护` is enabled and a timebox is active:
 
 Route: `/review`
 
-The Review page summarizes the selected day. When the page opens or `刷新` is clicked, planned timeboxes that have passed their end time are marked as `未完成`.
+The Review page summarizes the selected day. When the page opens or `Refresh` is clicked, planned timeboxes that have passed their end time are marked as missed.
 
 ### Metrics
 
 The top section shows four metrics:
 
-- `已计划盒子`: count and minutes still planned.
-- `已完成盒子`: count and minutes completed.
-- `效率（完成/计划）`: completed minutes divided by all scheduled minutes.
-- `进行中`: whether an active timebox exists.
+- `Planned`: count and minutes still planned.
+- `Done`: count and minutes completed.
+- `Efficiency`: completed minutes divided by all scheduled minutes.
+- `Active`: whether an active timebox exists.
 
 ### Completed Today
 
@@ -240,9 +241,9 @@ Shows timeboxes that passed their end time without being completed.
 
 Available actions:
 
-- `一键顺延全部`: snooze all missed items into later free slots.
-- Single-item `顺延`: snooze one missed timebox.
-- Single-item `删除`: delete one missed timebox after confirmation.
+- `Snooze All`: snooze all missed items into later free slots.
+- Single-item `Later`: snooze one missed timebox.
+- Single-item `Del`: delete one missed timebox after confirmation.
 
 ### Planned Today
 
@@ -258,15 +259,16 @@ The Settings page contains work parameters and local data management.
 
 Configurable fields:
 
-- `工作日开始`: start point for automatic scheduling.
-- `工作日结束`: end point for automatic scheduling.
-- `每日计划时长（分钟）`: default duration for the planning box, from `5` to `240` minutes.
-- `专注保护`: reduce interruptions on the Focus page while a timebox is active.
+- `Workday Start`: start point for automatic scheduling.
+- `Workday End`: end point for automatic scheduling.
+- `Plan Minutes`: default duration for the planning box, from `5` to `240` minutes.
+- `Focus Shield`: reduce interruptions on the Focus page while a timebox is active.
+- `Language`: choose `System`, `中文`, or `English`. Switching updates the UI immediately and saves the preference locally.
 
 Buttons:
 
-- `保存设置`: save current settings.
-- `恢复默认`: restore default settings.
+- `Save`: save current settings.
+- `Reset`: restore default settings.
 
 ### Local Data
 
@@ -280,9 +282,9 @@ This section shows:
 
 Available actions:
 
-- `导出 JSON`: download a full local data backup.
-- `导入 JSON`: choose a backup file and restore it.
-- `清空数据`: clear timeboxes, backlog items, logs, and settings, then restore defaults.
+- `Export JSON`: download a full local data backup.
+- `Import JSON`: choose a backup file and restore it.
+- `Clear Data`: clear timeboxes, backlog items, logs, and settings, then restore defaults.
 
 Import replaces current local data. Export a backup first if you need a rollback point.
 

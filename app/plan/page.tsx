@@ -2,6 +2,7 @@
 
 import AppLayout from '../components/AppLayout';
 import { useDate } from '../components/DateProvider';
+import { useI18n } from '../components/I18nProvider';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Box, BacklogItem } from '@/lib/types';
 import { getSettings } from '@/lib/actions/settings';
@@ -35,6 +36,7 @@ export default function PlanPage() {
 
 function PlanPageContent() {
   const { selectedDate, formatForInput } = useDate();
+  const { t, language } = useI18n();
 
   const [backlog, setBacklog] = useState<BacklogItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -109,8 +111,12 @@ function PlanPageContent() {
 
   // 待办事项按首字母升序显示（仅影响展示）
   const collator = useMemo(
-    () => new Intl.Collator('zh-Hans-u-co-pinyin', { sensitivity: 'base', numeric: true }),
-    []
+    () =>
+      new Intl.Collator(language === 'zh-CN' ? 'zh-Hans-u-co-pinyin' : 'en', {
+        sensitivity: 'base',
+        numeric: true,
+      }),
+    [language]
   );
   const normalizeTitle = useCallback((t: string) => {
     return t.trim().replace(/^[\s\-\—_~•\[\](){}<>《》【】「」'"\.,，。、·]+/, '');
@@ -134,6 +140,35 @@ function PlanPageContent() {
     if (!selectedBox) return 0;
     return Math.round((selectedBox.end.getTime() - selectedBox.start.getTime()) / 60000);
   }, [selectedBox]);
+
+  const urgencyTag = useCallback(
+    (level: 'urgent' | 'important' | 'normal') => {
+      if (language === 'zh-CN') {
+        return level === 'urgent' ? '#紧急' : level === 'important' ? '#重要' : '#一般';
+      }
+      return level === 'urgent' ? '#urgent' : level === 'important' ? '#important' : '#normal';
+    },
+    [language]
+  );
+
+  const urgencyLabel = useCallback(
+    (level: 'urgent' | 'important' | 'normal') => {
+      if (level === 'urgent') return t('urgency.urgent');
+      if (level === 'important') return t('urgency.important');
+      return t('urgency.normal');
+    },
+    [t]
+  );
+
+  const statusLabel = useCallback(
+    (status: Box['status']) => {
+      if (status === 'planned') return t('status.planned');
+      if (status === 'active') return t('status.active');
+      if (status === 'done') return t('status.done');
+      return t('status.missed');
+    },
+    [t]
+  );
 
   async function refreshBacklog() {
     const items = await listBacklog();
@@ -168,7 +203,11 @@ function PlanPageContent() {
   async function handleCreatePlanSession() {
     setBusy(true);
     try {
-      await ensurePlanSessionForDay(selectedDate);
+      await ensurePlanSessionForDay(selectedDate, {
+        title: t('plan.planSession.title'),
+        tag: t('plan.planSession.tag'),
+        notes: t('plan.planSession.notes'),
+      });
       await refreshDayBoxes();
       setShowPlanPrompt(false);
     } finally {
@@ -222,7 +261,7 @@ function PlanPageContent() {
         const tags = Array.isArray(item.tags) ? [...item.tags] : [];
         const rank = urgencyRank(tags);
         const hasRank = rank === 2 || rank === 1 || rank === 0;
-        if (!hasRank) tags.push('#重要');
+        if (!hasRank) tags.push(urgencyTag('important'));
 
         await createBox({
           title: item.title,
@@ -270,12 +309,12 @@ function PlanPageContent() {
       ].map((t) => t.toLowerCase())
     );
     const removed = src.filter((t) => !syn.has(t.trim().toLowerCase()));
-    const add = level === 'urgent' ? '#紧急' : level === 'important' ? '#重要' : '#一般';
+    const add = urgencyTag(level);
 
     // 更新输入框文本
     setMetaTags([...removed, add].join(' '));
-    const label = level === 'urgent' ? '紧急' : level === 'important' ? '重要' : '一般';
-    showToast(`已设置紧急程度为 ${label}`);
+    const label = urgencyLabel(level);
+    showToast(t('plan.toast.urgencySet', { label }));
 
     // 即时预览：仅本地更新选中盒子的 tags，让日历立即变色
     if (selectedBox) {
@@ -295,7 +334,7 @@ function PlanPageContent() {
       metaNotes === (selectedBox.notes ?? '') &&
       nextTags.join(' ') === prevTagsStr;
     if (same) {
-      showToast('无改动');
+      showToast(t('common.noChanges'));
       return;
     }
     setBusy(true);
@@ -306,7 +345,7 @@ function PlanPageContent() {
         tags: nextTags,
       });
       await refreshDayBoxes();
-      showToast('属性已保存');
+      showToast(t('plan.toast.metaSaved'));
     } finally {
       setBusy(false);
     }
@@ -317,7 +356,7 @@ function PlanPageContent() {
     const title = newTitle.trim();
     if (!title) return;
     if (newEstimate < 5 || newEstimate > 480) {
-      alert('请输入 5–480 分钟');
+      alert(t('plan.alert.minutesRange', { min: 5, max: 480 }));
       return;
     }
     setBusy(true);
@@ -362,7 +401,7 @@ function PlanPageContent() {
           '#low',
         ].map((t) => t.toLowerCase())
       );
-      const add = level === 'urgent' ? '#紧急' : level === 'important' ? '#重要' : '#一般';
+      const add = urgencyTag(level);
 
       for (const id of selectedIds) {
         const item = backlog.find((b) => b.id === id);
@@ -372,8 +411,8 @@ function PlanPageContent() {
         await updateBacklogItem(id, { tags: [...removed, add] });
       }
       await refreshBacklog();
-      const label = level === 'urgent' ? '紧急' : level === 'important' ? '重要' : '一般';
-      showToast(`已更新 ${selectedIds.length} 项为「${label}」`);
+      const label = urgencyLabel(level);
+      showToast(t('plan.toast.bulkUrgency', { count: selectedIds.length, label }));
     } finally {
       setBusy(false);
     }
@@ -386,7 +425,7 @@ function PlanPageContent() {
     const titles = backlog.filter((b) => selectedIds.includes(b.id)).map((b) => b.title);
     const preview = titles.slice(0, 8).map((t) => `- ${t}`).join('\n');
     const ok = window.confirm(
-      `确认删除选中的 ${count} 项？\n\n${preview}${titles.length > 8 ? '\n...' : ''}\n\n此操作仅删除待办列表，不影响已安排的时间盒。`
+      `${t('plan.confirm.deleteSelectedTitle', { count })}\n\n${preview}${titles.length > 8 ? '\n...' : ''}\n\n${t('plan.confirm.deleteSelectedBody')}`
     );
     if (!ok) return;
 
@@ -397,7 +436,7 @@ function PlanPageContent() {
       }
       await refreshBacklog();
       setSelectedIds([]);
-      showToast(`已删除 ${count} 项待办`);
+      showToast(t('plan.toast.deletedBacklog', { count }));
     } finally {
       setBusy(false);
     }
@@ -420,11 +459,11 @@ function PlanPageContent() {
     if (!editingBacklogId) return;
     const title = editTitle.trim();
     if (!title) {
-      alert('标题不能为空');
+      alert(t('plan.alert.titleRequired'));
       return;
     }
     if (editEstimate < 5 || editEstimate > 480) {
-      alert('请输入 5–480 分钟');
+      alert(t('plan.alert.minutesRange', { min: 5, max: 480 }));
       return;
     }
     setBusy(true);
@@ -465,7 +504,7 @@ function PlanPageContent() {
         e.preventDefault();
         const item = backlog.find((b) => b.id === actionRowId);
         if (!item) return;
-        if (confirm('确认删除该待办？')) {
+        if (confirm(t('plan.confirm.deleteBacklog'))) {
           setBusy(true);
           try {
             await deleteBacklogItem(item.id);
@@ -494,8 +533,10 @@ function PlanPageContent() {
   return (
     <>
       <div className="flex flex-col h-full overflow-hidden">
-        <h1 className="text-2xl font-semibold mb-2">Plan 计划</h1>
-        <p className="text-sm text-gray-600">当前日期：{formatForInput(selectedDate)}</p>
+        <h1 className="text-2xl font-semibold mb-2">{t('plan.title')}</h1>
+        <p className="text-sm text-gray-600">
+          {t('common.currentDate', { date: formatForInput(selectedDate) })}
+        </p>
 
       {toast ? (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-purple-800 text-white text-xs rounded-full px-3 py-2 shadow">
@@ -506,20 +547,20 @@ function PlanPageContent() {
       {/* 计划盒弹窗（上方提示） */}
       {showPlanPrompt && (
         <div className="mt-3 mb-4 border rounded-2xl bg-blue-50 p-3 text-sm">
-          <div className="font-medium mb-1">创建今日计划盒（建议 15–30 分钟，放在工作日开始）</div>
+          <div className="font-medium mb-1">{t('plan.prompt.title')}</div>
           <div className="flex gap-2">
             <button
                 className="px-3 py-1 rounded-full bg-blue-600 text-white disabled:opacity-50"
                 onClick={handleCreatePlanSession}
                 disabled={busy}
               >
-                创建计划盒
+                {t('plan.prompt.create')}
               </button>
               <button
                 className="px-3 py-1 rounded-full bg-gray-200"
                 onClick={() => setShowPlanPrompt(false)}
               >
-                今日忽略
+                {t('plan.prompt.ignoreToday')}
               </button>
           </div>
         </div>
@@ -531,24 +572,24 @@ function PlanPageContent() {
           onClick={() => setActionRowId(null)} // 点击面板空白处收起当前行按钮
         >
           <div className="flex items-center justify-between mb-2">
-            <div className="font-medium">待办事项</div>
+            <div className="font-medium">{t('plan.backlog.title')}</div>
             <div className="flex gap-2">
               <button
                 className="px-2 py-1 text-xs rounded-full bg-blue-600 text-white disabled:opacity-50"
                 onClick={arrangeSelectedToToday}
                 disabled={busy || selectedIds.length === 0}
-                title="将选中待办按空窗安排到今天"
+                title={t('plan.backlog.arrangeToday')}
               >
-                安排到今天
+                {t('plan.backlog.arrangeToday')}
               </button>
               {/* 新增：批量删除选中待办 */}
               <button
                 className="px-2 py-1 text-xs rounded-full bg-red-600 text-white disabled:opacity-50"
                 onClick={deleteSelectedBacklog}
                 disabled={busy || selectedIds.length === 0}
-                title="删除选中的待办事项（带确认）"
+                title={t('plan.backlog.bulkDelete')}
               >
-                批量删除
+                {t('plan.backlog.bulkDelete')}
               </button>
             </div>
           </div>
@@ -558,7 +599,7 @@ function PlanPageContent() {
           <div className="mb-2 space-y-2">
             <input
                 className="w-full border rounded px-2 py-1 text-sm"
-                placeholder="待办标题（必填）"
+                placeholder={t('plan.backlog.placeholder')}
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
               />
@@ -582,21 +623,21 @@ function PlanPageContent() {
                   onBlur={(e) => {
                     const n = parseInt(e.target.value || '0', 10);
                     if (!Number.isFinite(n) || n < 5) {
-                      alert('最小值为 5 分钟');
+                      alert(t('plan.alert.minMinutes', { min: 5 }));
                       setNewEstimateText('5');
                       return;
                     }
                     if (n > 480) {
-                      alert('最大值为 480 分钟');
+                      alert(t('plan.alert.maxMinutes', { max: 480 }));
                       setNewEstimateText('480');
                       return;
                     }
                     setNewEstimateText(String(n));
                   }}
-                  title="预估分钟数（5–480）"
+                  title={t('plan.backlog.editEstimateTitle')}
                 />
                 <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 pointer-events-none">
-                  分钟
+                  {t('common.minuteUnit')}
                 </span>
               </div>
               <button
@@ -604,34 +645,37 @@ function PlanPageContent() {
                 onClick={handleManualAdd}
                 disabled={busy || newTitle.trim() === '' || newEstimate < 5 || newEstimate > 480}
               >
-                添加
+                {t('common.add')}
               </button>
             </div>
           </div>
 
           {/* 批量紧急程度（作用于当前选中项） */}
           <div className="mb-2 flex items-center gap-2">
-            <span className="text-xs text-gray-600">批量设置紧急程度：</span>
+            <span className="text-xs text-gray-600">{t('plan.backlog.batchUrgency')}</span>
             <button
               className="px-2 py-1 text-xs rounded-full bg-yellow-600 text-white disabled:opacity-50"
               onClick={() => applyUrgencyToSelected('important')}
               disabled={busy || selectedIds.length === 0}
+              title={t('urgency.important')}
             >
-              重要
+              {t('urgency.important')}
             </button>
             <button
                 className="px-2 py-1 text-xs rounded-full bg-rose-600 text-white disabled:opacity-50"
                 onClick={() => applyUrgencyToSelected('urgent')}
                 disabled={busy || selectedIds.length === 0}
+                title={t('urgency.urgent')}
               >
-                紧急
+                {t('urgency.urgent')}
               </button>
             <button
               className="px-2 py-1 text-xs rounded-full bg-emerald-600 text-white disabled:opacity-50"
               onClick={() => applyUrgencyToSelected('normal')}
               disabled={busy || selectedIds.length === 0}
+              title={t('urgency.normal')}
             >
-              一般
+              {t('urgency.normal')}
             </button>
           </div>
 
@@ -688,10 +732,10 @@ function PlanPageContent() {
                             value={editEstimateText}
                             onChange={(e) => setEditEstimateText(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            title="预估分钟数（5–480）"
+                            title={t('plan.backlog.editEstimateTitle')}
                           />
                           <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] text-gray-500 pointer-events-none">
-                            分钟
+                            {t('common.minuteUnit')}
                           </span>
                         </div>
                       </>
@@ -699,7 +743,7 @@ function PlanPageContent() {
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-sm truncate">{item.title}</span>
                         <span className="text-[10px] text-gray-500 shrink-0">
-                          {item.estimate_min ?? 30} 分钟
+                          {item.estimate_min ?? 30} {t('common.minuteUnit')}
                         </span>
                       </div>
                     )}
@@ -716,13 +760,13 @@ function PlanPageContent() {
                         onClick={saveEditBacklog}
                         disabled={busy}
                       >
-                        保存
+                        {t('common.save')}
                       </button>
                       <button
                         className="px-2 py-0.5 text-[10px] rounded-full bg-gray-200"
                         onClick={cancelEditBacklog}
                       >
-                        取消
+                        {t('common.cancel')}
                       </button>
                     </div>
                   ) : showActions ? (
@@ -736,9 +780,9 @@ function PlanPageContent() {
                           setActionRowId(item.id);
                           startEditBacklog(item);
                         }}
-                        title="编辑"
+                        title={t('common.edit')}
                       >
-                        编辑
+                        {t('common.edit')}
                       </button>
                       {/* 已移除“安排”按钮 */}
                       <button
@@ -754,9 +798,9 @@ function PlanPageContent() {
                           }
                         }}
                         disabled={busy}
-                        title="删除待办"
+                        title={t('plan.backlog.deleteTitle')}
                       >
-                        删除
+                        {t('common.delete')}
                       </button>
                     </div>
                   ) : (
@@ -781,23 +825,21 @@ function PlanPageContent() {
 
         {/* 右栏 属性面板 */}
         <div className="border rounded-2xl bg-yellow-50/30 p-3 h-full min-h-0 overflow-y-auto">
-            <div className="font-medium mb-2">属性面板</div>
+            <div className="font-medium mb-2">{t('plan.panel.title')}</div>
             {!selectedBox ? (
-                <div className="text-sm text-gray-600">未选中时间盒</div>
+                <div className="text-sm text-gray-600">{t('plan.panel.noSelection')}</div>
             ) : (
                 <div className="space-y-2">
-                    <div className="text-xs text-gray-600">时长：{selectedDurationMin} 分钟 · 状态：{
-                      selectedBox.status === 'planned' ? '已计划' :
-                      selectedBox.status === 'active' ? '进行中' :
-                      selectedBox.status === 'done' ? '已完成' :
-                      selectedBox.status === 'missed' ? '未完成' :
-                      selectedBox.status
-                    }
+                    <div className="text-xs text-gray-600">
+                      {t('plan.panel.durationStatus', {
+                        duration: selectedDurationMin,
+                        status: statusLabel(selectedBox.status),
+                      })}
                     </div>
 
                     {/* 标题 */}
                     <div className="space-y-1">
-                        <div className="text-xs text-gray-600">标题</div>
+                        <div className="text-xs text-gray-600">{t('plan.panel.boxTitle')}</div>
                         <input
                             className="w-full border rounded px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
                             value={metaTitle}
@@ -807,7 +849,7 @@ function PlanPageContent() {
 
                     {/* 标签（空格分隔） */}
                     <div className="space-y-1">
-                        <div className="text-xs text-gray-600">标签（空格分隔）</div>
+                        <div className="text-xs text-gray-600">{t('plan.panel.tags')}</div>
                         <input
                             className="w-full border rounded px-2 py-1 text-sm"
                             value={metaTags}
@@ -819,28 +861,28 @@ function PlanPageContent() {
                                 onClick={() => applyUrgency('important')}
                                 disabled={busy}
                             >
-                                重要
+                                {t('urgency.important')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-rose-600 text-white disabled:opacity-50"
                                 onClick={() => applyUrgency('urgent')}
                                 disabled={busy}
                             >
-                                紧急
+                                {t('urgency.urgent')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-emerald-600 text-white disabled:opacity-50"
                                 onClick={() => applyUrgency('normal')}
                                 disabled={busy}
                             >
-                                一般
+                                {t('urgency.normal')}
                             </button>
                         </div>
                     </div>
 
                     {/* 备注 */}
                     <div className="space-y-1">
-                        <div className="text-xs text-gray-600">备注</div>
+                        <div className="text-xs text-gray-600">{t('plan.panel.notes')}</div>
                         <textarea
                             className="w-full border rounded px-2 py-1 text-sm disabled:bg-gray-100 disabled:text-gray-500"
                             rows={3}
@@ -856,50 +898,50 @@ function PlanPageContent() {
                             onClick={handleSaveMeta}
                             disabled={busy || !isMetaDirty}
                         >
-                            保存属性
+                            {t('plan.panel.saveMeta')}
                         </button>
                     </div>
 
                     {/* 状态操作（统一中文，两字） */}
                     <div className="space-y-1">
-                        <div className="text-xs text-gray-600">状态操作</div>
+                        <div className="text-xs text-gray-600">{t('plan.panel.statusActions')}</div>
                         <div className="flex gap-2">
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-green-600 text-white disabled:opacity-50"
                                 onClick={() => handleBoxAction(selectedBox.id, 'start')}
                                 disabled={busy || selectedBox.status !== 'planned'}
                             >
-                                开始
+                                {t('common.start')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-purple-800 text-white disabled:opacity-50"
                                 onClick={() => handleBoxAction(selectedBox.id, 'finish')}
                                 disabled={busy || selectedBox.status === 'done'}
                             >
-                                完成
+                                {t('common.done')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-red-600 text-white disabled:opacity-50"
                                 onClick={() => handleBoxAction(selectedBox.id, 'delete')}
                                 disabled={busy}
                             >
-                                删除
+                                {t('common.delete')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-amber-500 text-white disabled:opacity-50"
                                 onClick={() => handleBoxAction(selectedBox.id, 'shift')}
                                 disabled={busy}
-                                title="移动到下一空窗"
+                                title={t('plan.panel.moveNextTitle')}
                             >
-                                顺延
+                                {t('common.snooze')}
                             </button>
                             <button
                                 className="px-2 py-1 text-xs rounded-full bg-indigo-600 text-white disabled:opacity-50"
                                 onClick={() => handleBoxAction(selectedBox.id, 'split')}
                                 disabled={busy || selectedBox.status !== 'active'}
-                                title="拆分进行中的盒子"
+                                title={t('plan.panel.splitTitle')}
                             >
-                                分割
+                                {t('common.split')}
                             </button>
                         </div>
                     </div>

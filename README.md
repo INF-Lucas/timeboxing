@@ -13,7 +13,7 @@ Timeboxing 是一个本地优先的时间盒应用，用于把一天拆成可执
 - 计划：维护待办事项，把任务安排到当天空窗。
 - 执行：启动、完成、顺延、分割、延长时间盒。
 - 复盘：查看已计划、已完成、未完成和执行效率。
-- 设置：配置工作日时间、每日计划时长、专注保护。
+- 设置：配置工作日时间、每日计划时长、专注保护和界面语言。
 - 本地数据：基于 IndexedDB 存储，支持 JSON 导出、导入和清空。
 - 桌面版：通过 Electron 打包为 macOS 应用。
 
@@ -70,6 +70,7 @@ npm run dist-mac
 - 存储内容：时间盒、待办、日志、设置
 - 备份入口：`Settings 设置 -> 本地数据 -> 导出 JSON`
 - 恢复入口：`Settings 设置 -> 本地数据 -> 导入 JSON`
+- 语言入口：`Settings 设置 -> 语言`，支持跟随系统、中文和 English。
 
 更多细节见 [docs/LOCAL_STORAGE.md](docs/LOCAL_STORAGE.md)。
 
@@ -129,7 +130,7 @@ This project is inspired by Marc Zao-Sanders' *Timeboxing: The Power of Doing On
 - Plan: manage backlog items and schedule them into available slots.
 - Focus: start, finish, snooze, split, and extend timeboxes.
 - Review: inspect planned, completed, missed, and active work.
-- Settings: configure workday hours, planning duration, and focus shield.
+- Settings: configure workday hours, planning duration, focus shield, and interface language.
 - Local data: IndexedDB storage with JSON export, import, and reset.
 - Desktop: Electron packaging for macOS.
 
@@ -184,8 +185,9 @@ The app uses IndexedDB by default. Users do not need to configure a database, ac
 
 - Database name: `timeboxing_oss_db`
 - Stored data: timeboxes, backlog items, logs, and settings
-- Backup: `Settings 设置 -> 本地数据 -> 导出 JSON`
-- Restore: `Settings 设置 -> 本地数据 -> 导入 JSON`
+- Backup: `Settings -> Local Data -> Export JSON`
+- Restore: `Settings -> Local Data -> Import JSON`
+- Language: `Settings -> Language`, with System, 中文, and English options.
 
 See [docs/LOCAL_STORAGE.md](docs/LOCAL_STORAGE.md) for details.
 

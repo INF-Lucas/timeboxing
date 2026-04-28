@@ -2,6 +2,7 @@
 
 import AppLayout from '../components/AppLayout';
 import { useDate } from '../components/DateProvider';
+import { useI18n } from '../components/I18nProvider';
 import { useEffect, useMemo, useState } from 'react';
 import type { Box } from '@/lib/types';
 import {
@@ -27,6 +28,7 @@ export default function FocusPage() {
 
 function FocusPageContent() {
   const { selectedDate, formatForInput } = useDate();
+  const { t } = useI18n();
 
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [busy, setBusy] = useState(false);
@@ -117,7 +119,7 @@ function FocusPageContent() {
     try {
       await shiftBox(boxId);
       await refreshBoxes();
-      showToast('已延后到下一空窗');
+      showToast(t('focus.toast.snoozed'));
     } finally {
       setBusy(false);
     }
@@ -155,7 +157,7 @@ function FocusPageContent() {
     try {
       await extendBox(activeBox.id, delta);
       await refreshBoxes();
-      showToast(`已延长 ${delta} 分钟`);
+      showToast(t('focus.toast.extended', { minutes: delta }));
     } finally {
       setBusy(false);
     }
@@ -167,7 +169,7 @@ function FocusPageContent() {
     try {
       await extendBox(extendDraft.boxId, extendDraft.minutes);
       await refreshBoxes();
-      showToast(`仍然延长 ${extendDraft.minutes} 分钟`);
+      showToast(t('focus.toast.keepExtended', { minutes: extendDraft.minutes }));
     } finally {
       setBusy(false);
       setExtendConflict(false);
@@ -182,11 +184,11 @@ function FocusPageContent() {
     try {
       const slot = await findNextFreeSlot(selectedDate, duration, extendDraft.nextEnd);
       if (!slot) {
-        alert('今日无可用空窗可解决冲突');
+        alert(t('focus.alert.noSlot'));
       } else {
         await updateBoxTimes(extendDraft.boxId, slot.start, slot.end);
         await refreshBoxes();
-        showToast('已移到下一空窗');
+        showToast(t('focus.toast.movedNext'));
         setExtendConflict(false);
         setExtendDraft(null);
       }
@@ -295,18 +297,20 @@ function FocusPageContent() {
 
       {shieldOnActive ? (
         <div className="fixed top-14 left-1/2 -translate-x-1/2 text-[11px] px-2 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
-          专注保护已开启：已屏蔽提示与部分快捷键
+          {t('focus.shieldOn')}
         </div>
       ) : null}
 
-      <h1 className="text-2xl font-semibold mb-2">Focus 执行</h1>
-      <p className="text-sm text-gray-600">当前日期：{formatForInput(selectedDate)}</p>
+      <h1 className="text-2xl font-semibold mb-2">{t('focus.title')}</h1>
+      <p className="text-sm text-gray-600">
+        {t('common.currentDate', { date: formatForInput(selectedDate) })}
+      </p>
 
       {activeBox ? (
         <div className="mt-4 border rounded-2xl bg-yellow-50/30 p-4">
           <div className="text-lg font-medium">{activeBox.title}</div>
           <div className="text-sm text-gray-600 mt-1">
-            {fmtHM(activeBox.start)} — {fmtHM(activeBox.end)}（剩余约 {remainingMin} 分钟）
+            {fmtHM(activeBox.start)} — {fmtHM(activeBox.end)} ({t('focus.remaining', { minutes: remainingMin })})
           </div>
           <div className="flex gap-2 mt-3">
             <button
@@ -314,26 +318,30 @@ function FocusPageContent() {
               onClick={handleFinish}
               disabled={busy}
             >
-              完成
+              {t('common.done')}
             </button>
             <button
               className="px-3 py-1 rounded-full bg-indigo-600 text-white disabled:opacity-50"
               onClick={handleSplit}
               disabled={busy || shieldOnActive}
-              title="到当前为止完成，并将剩余部分安排到下一空窗"
+              title={t('focus.splitTitle')}
             >
-              分割
+              {t('common.split')}
             </button>
           </div>
         </div>
       ) : (
         <div className="mt-4 grid gap-4">
           <div className="border rounded-2xl bg-yellow-50/30 p-4">
-            <div className="font-medium mb-2">当前无进行中盒子</div>
+            <div className="font-medium mb-2">{t('focus.noActive')}</div>
             {dueBox ? (
               <div>
                 <div className="text-sm text-gray-700">
-                  当前时段应做：{dueBox.title}（{fmtHM(dueBox.start)} — {fmtHM(dueBox.end)}）
+                  {t('focus.dueBox', {
+                    title: dueBox.title,
+                    start: fmtHM(dueBox.start),
+                    end: fmtHM(dueBox.end),
+                  })}
                 </div>
                 <div className="flex gap-2 mt-2">
                   <button
@@ -341,22 +349,26 @@ function FocusPageContent() {
                     onClick={() => handleStart(dueBox.id)}
                     disabled={busy}
                   >
-                    开始
+                    {t('common.start')}
                   </button>
                   <button
                     className="px-3 py-1 rounded-full bg-amber-500 text-white disabled:opacity-50"
                     onClick={() => handleSnooze(dueBox.id)}
                     disabled={busy || shieldOnActive}
-                    title="顺延到下一空窗"
+                    title={t('focus.snoozeTitle')}
                   >
-                    顺延
+                    {t('common.snooze')}
                   </button>
                 </div>
               </div>
             ) : nextPlanned ? (
               <div>
                 <div className="text-sm text-gray-700">
-                  下一个：{nextPlanned.title}（{fmtHM(nextPlanned.start)} — {fmtHM(nextPlanned.end)}）
+                  {t('focus.nextBox', {
+                    title: nextPlanned.title,
+                    start: fmtHM(nextPlanned.start),
+                    end: fmtHM(nextPlanned.end),
+                  })}
                 </div>
                 <div className="flex gap-2 mt-2">
                   <button
@@ -364,19 +376,19 @@ function FocusPageContent() {
                     onClick={() => handleStart(nextPlanned.id)}
                     disabled={busy}
                   >
-                    开始
+                    {t('common.start')}
                   </button>
                   <button
                     className="px-3 py-1 rounded-full bg-amber-500 text-white disabled:opacity-50"
                     onClick={() => handleSnooze(nextPlanned.id)}
                     disabled={busy || shieldOnActive}
                   >
-                    顺延
+                    {t('common.snooze')}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-500">今日暂无待做盒子。</div>
+              <div className="text-sm text-gray-500">{t('focus.noBoxes')}</div>
             )}
           </div>
         </div>
@@ -384,7 +396,7 @@ function FocusPageContent() {
 
       {extendConflict && extendDraft ? (
         <div className="mt-3 border rounded-2xl p-2 bg-rose-50">
-          <div className="font-medium mb-1">时间冲突</div>
+          <div className="font-medium mb-1">{t('focus.conflict')}</div>
           <div className="text-xs text-gray-600 mb-2">
             [{extendDraft.title}] {fmtHM(extendDraft.prevStart)} — {fmtHM(extendDraft.nextEnd)}
           </div>
@@ -394,17 +406,17 @@ function FocusPageContent() {
               onClick={confirmExtend}
               disabled={busy}
             >
-              仍然延长（{extendDraft.minutes}m）
+              {t('focus.keepExtend', { minutes: extendDraft.minutes })}
             </button>
             <button
               className="px-2 py-1 text-xs rounded-full bg-gray-200 disabled:opacity-50"
               onClick={moveExtendConflictToNextFreeSlot}
               disabled={busy}
             >
-              移到下一空窗
+              {t('focus.moveNext')}
             </button>
             <button className="px-2 py-1 text-xs rounded-full bg-gray-200" onClick={cancelExtend}>
-              取消
+              {t('common.cancel')}
             </button>
           </div>
         </div>

@@ -61,6 +61,7 @@ settings   应用设置，使用 singleton 记录
 - 工作日结束时间。
 - 每日计划盒默认时长。
 - 专注保护开关。
+- 界面语言偏好（跟随系统、中文或 English）。
 - 日历集成开关字段。
 
 ### 导出备份
@@ -164,11 +165,12 @@ settings   app settings stored as a singleton record
 - Workday end time.
 - Default daily planning box duration.
 - Focus shield flag.
+- Interface language preference (System, 中文, or English).
 - Calendar integration flag field.
 
 ### Backup
 
-Open `Settings 设置 -> 本地数据` and choose `导出 JSON`.
+Open `Settings -> Local Data` and choose `Export JSON`.
 
 The exported JSON contains:
 
@@ -183,7 +185,7 @@ Export a backup before large schedule changes, data clearing, or moving to anoth
 
 ### Restore
 
-Open `Settings 设置 -> 本地数据`, choose `导入 JSON`, and select a backup file.
+Open `Settings -> Local Data`, choose `Import JSON`, and select a backup file.
 
 Import currently replaces existing local data. Export first if you want a rollback point.
 
@@ -191,7 +193,7 @@ During import, date fields from JSON are revived into `Date` objects so that cal
 
 ### Reset
 
-Open `Settings 设置 -> 本地数据` and choose `清空数据`.
+Open `Settings -> Local Data` and choose `Clear Data`.
 
 This clears:
 

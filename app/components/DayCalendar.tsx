@@ -12,6 +12,7 @@ import {
   splitActiveBox,
 } from '@/lib/actions/boxes';
 import { hasOverlap } from '@/lib/utils/overlap';
+import { useI18n } from './I18nProvider';
 
 type Props = {
   day: Date;
@@ -45,6 +46,7 @@ export default function DayCalendar({
   onSelectBox,
   selectedBoxId,
 }: Props) {
+  const { t } = useI18n();
   // === 常量 ===
   const pxPerMin = 2;
   const MIN_BOX_MINUTES = 15;
@@ -308,7 +310,7 @@ export default function DayCalendar({
     const duration = diffMin(conflict.start, conflict.end);
     const slot = await findNextFreeSlot(day, duration, conflict.end);
     if (!slot) {
-      alert('今日无可用空窗可解决冲突');
+      alert(t('calendar.alert.noSlot'));
       return;
     }
     await finalizeUpdate(conflict.boxId, slot.start, slot.end);
@@ -470,7 +472,7 @@ export default function DayCalendar({
                               enableMove ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                             }`}
                             onPointerDown={enableMove ? (e) => handlePointerDown(b, e) : undefined}
-                            title={enableMove ? '拖拽移动' : ''}
+                            title={enableMove ? t('calendar.dragMove') : ''}
                           />
 
                           {/* 中右侧点击区域 */}
@@ -482,7 +484,7 @@ export default function DayCalendar({
                           <div className="flex items-center px-2 py-1 relative z-10 pointer-events-none">
                             <div className="flex items-center gap-2">
                               <div className={`text-sm font-medium truncate ${done ? 'line-through' : ''} text-slate-800`}>
-                                {b.title} {b.is_plan_session ? <span className="text-blue-600">(计划盒)</span> : null}
+                                {b.title} {b.is_plan_session ? <span className="text-blue-600">{t('calendar.planBadge')}</span> : null}
                               </div>
                               <span
                                 className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
@@ -495,7 +497,7 @@ export default function DayCalendar({
                                     : 'status-planned'
                                 }`}
                               >
-                                {active ? '进行中' : done ? '已完成' : b.status === 'missed' ? '未完成' : '已计划'}
+                                {active ? t('status.active') : done ? t('status.done') : b.status === 'missed' ? t('status.missed') : t('status.planned')}
                               </span>
                             </div>
                           </div>
@@ -505,7 +507,7 @@ export default function DayCalendar({
                             className="absolute left-0 right-0 h-3 bottom-0 cursor-ns-resize bg-gradient-to-t from-slate-100/20 to-transparent rounded-b-2xl hover:from-slate-200/20 transition-colors duration-200"
                             onPointerDown={(e) => startResize(b, e)}
                             onClick={(e) => e.stopPropagation()}
-                            title="拖拽调整时长"
+                            title={t('calendar.resize')}
                           />
                         </div>
 
@@ -537,7 +539,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  开始
+                                  {t('common.start')}
                                 </button>
                                 <button
                                   onPointerDown={(e) => e.stopPropagation()}
@@ -554,7 +556,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  顺延
+                                  {t('common.snooze')}
                                 </button>
                                 <button
                                   onPointerDown={(e) => e.stopPropagation()}
@@ -571,7 +573,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  删除
+                                  {t('common.delete')}
                                 </button>
                               </>
                             ) : b.status === 'active' ? (
@@ -591,7 +593,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-slate-700 text-white hover:bg-slate-800 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  完成
+                                  {t('common.done')}
                                 </button>
                                 <button
                                   onPointerDown={(e) => e.stopPropagation()}
@@ -608,7 +610,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  分割
+                                  {t('common.split')}
                                 </button>
                                 <button
                                   onPointerDown={(e) => e.stopPropagation()}
@@ -625,7 +627,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  删除
+                                  {t('common.delete')}
                                 </button>
                               </>
                             ) : b.status === 'missed' ? (
@@ -645,7 +647,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  顺延
+                                  {t('common.snooze')}
                                 </button>
                                 <button
                                   onPointerDown={(e) => e.stopPropagation()}
@@ -662,7 +664,7 @@ export default function DayCalendar({
                                   className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                   disabled={busy}
                                 >
-                                  删除
+                                  {t('common.delete')}
                                 </button>
                               </>
                             ) : (
@@ -681,7 +683,7 @@ export default function DayCalendar({
                                 className="w-full text-center px-2 py-1 text-[10px] rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors duration-200 font-medium"
                                 disabled={busy}
                               >
-                                删除
+                                {t('common.delete')}
                               </button>
                             )}
                           </div>
@@ -723,7 +725,7 @@ export default function DayCalendar({
                         <div
                           className={`absolute -top-3 right-2 text-[10px] px-2 py-0.5 rounded-full ${liveConflict ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'} shadow`}
                         >
-                          {formatHM(draftEnd)} · {diffMin(draftStart, draftEnd)}min{liveConflict ? ' · 冲突' : ''}
+                          {formatHM(draftEnd)} · {t('calendar.previewDuration', { minutes: diffMin(draftStart, draftEnd) })}{liveConflict ? ` · ${t('calendar.conflictSuffix')}` : ''}
                         </div>
                       </div>
                     </>
@@ -762,7 +764,7 @@ export default function DayCalendar({
                         <div
                           className={`absolute -top-3 right-2 text-[10px] px-2 py-0.5 rounded-full ${liveConflict ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'} shadow`}
                         >
-                          {formatHM(draftEnd)} · {diffMin(resizing.start, draftEnd)}min{liveConflict ? ' · 冲突' : ''}
+                          {formatHM(draftEnd)} · {t('calendar.previewDuration', { minutes: diffMin(resizing.start, draftEnd) })}{liveConflict ? ` · ${t('calendar.conflictSuffix')}` : ''}
                         </div>
                       </div>
                     </>
@@ -778,7 +780,7 @@ export default function DayCalendar({
                           }}
                           onPointerDown={(e) => e.stopPropagation()}
                         >
-                          <div className="font-semibold mb-1 text-slate-800">时间冲突</div>
+                          <div className="font-semibold mb-1 text-slate-800">{t('calendar.conflict')}</div>
                           <div className="text-xs text-slate-600 mb-3">
                             {formatHM(conflict.start)} — {formatHM(conflict.end)}
                           </div>
@@ -786,9 +788,9 @@ export default function DayCalendar({
                             <button
                               className="px-3 py-1.5 text-xs rounded-full bg-amber-500 text-white hover:bg-amber-600 transition-colors duration-200 font-medium"
                               onClick={moveConflictToNextFreeSlot}
-                              title="自动移动到当下一空窗"
+                              title={t('calendar.moveNextTitle')}
                             >
-                              移到下一空窗
+                              {t('calendar.moveNext')}
                             </button>
                             <button
                               className="px-3 py-1.5 text-xs rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 font-medium"
@@ -797,13 +799,13 @@ export default function DayCalendar({
                                 setConflict(null);
                               }}
                             >
-                              仍然保存
+                              {t('calendar.saveAnyway')}
                             </button>
                             <button
                               className="px-3 py-1.5 text-xs rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors duration-200 font-medium"
                               onClick={() => setConflict(null)}
                             >
-                              取消
+                              {t('common.cancel')}
                             </button>
                           </div>
                         </div>

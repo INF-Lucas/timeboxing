@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: '时间盒 TIMEBOXING',
-  description: '高效的时间管理应用',
+  title: 'TIMEBOXING',
+  description: 'A local-first timeboxing app',
 };
 
 export default function RootLayout({

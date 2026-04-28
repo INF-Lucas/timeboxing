@@ -260,7 +260,10 @@ export async function splitActiveBox(boxId: string): Promise<void> {
 }
 
 // 当日“计划盒”自动生成（若不存在）
-export async function ensurePlanSessionForDay(day: Date): Promise<Box> {
+export async function ensurePlanSessionForDay(
+  day: Date,
+  copy: { title?: string; tag?: string; notes?: string } = {}
+): Promise<Box> {
     const settings = await getSettings();
 
     // 用“start”的当日范围作为有效键查询，再过滤 is_plan_session
@@ -281,14 +284,14 @@ export async function ensurePlanSessionForDay(day: Date): Promise<Box> {
     const end = new Date(start.getTime() + settings.planning_default_minutes * 60000);
 
     return await createBox({
-      title: '制定今日计划',
+      title: copy.title ?? '制定今日计划',
       start,
       end,
       status: 'planned',
       is_plan_session: true,
-      tags: ['已计划'],
+      tags: [copy.tag ?? '已计划'],
       color: '#2563eb',
-      notes: '每日 15–30 分钟计划环节',
+      notes: copy.notes ?? '每日 15–30 分钟计划环节',
     });
 }
 
