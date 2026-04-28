@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, useEffect, Fragment } from 'react';
+import { useCallback, useMemo, useRef, useState, useEffect, Fragment } from 'react';
 import type { Box } from '@/lib/types';
 import {
   startBox,
@@ -124,9 +124,9 @@ export default function DayCalendar({
   }
 
   // === 冲突检测 ===
-  function hasConflict(start: Date, end: Date, exceptId?: string): boolean {
+  const hasConflict = useCallback((start: Date, end: Date, exceptId?: string): boolean => {
     return hasOverlap(start, end, boxes, exceptId);
-  }
+  }, [boxes]);
 
   const liveConflict = useMemo(() => {
     if (moving && draftStart && draftEnd) {
@@ -136,7 +136,7 @@ export default function DayCalendar({
       return hasConflict(draftStart, draftEnd, resizing.id);
     }
     return false;
-  }, [boxes, moving, resizing, draftStart, draftEnd]);
+  }, [hasConflict, moving, resizing, draftStart, draftEnd]);
 
   // 冲突弹窗定位
   const POP_HEIGHT = 96;
@@ -197,15 +197,7 @@ export default function DayCalendar({
     setDragTimer(timer);
   }
 
-  function handlePointerUpForDrag() {
-    if (dragTimer) {
-      clearTimeout(dragTimer);
-      setDragTimer(null);
-    }
-    setIsDragReady(false);
-  }
-
-  function handleClick(box: Box, e: React.MouseEvent) {
+  function handleClick(box: Box) {
     if (!isDragReady && !moving) {
       onSelectBox?.(box);
     }
@@ -460,7 +452,7 @@ export default function DayCalendar({
                       <Fragment key={`${b.id}-${col.index}`}>
                         <div
                           data-box="true"
-                          onClick={(e) => handleClick(b, e)}
+                          onClick={() => handleClick(b)}
                           className={`${cardBase} ${cardTone} ${
                             selectedBoxId === b.id ? 'ring-2 ring-blue-400/60 shadow-lg' : ''
                           } ${done ? 'opacity-70' : ''}`}

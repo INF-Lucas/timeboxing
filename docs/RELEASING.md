@@ -8,7 +8,7 @@
 
 ### 前置要求
 
-- 推荐 Node.js 20 或更新版本。
+- 推荐 Node.js 22.13 或更新版本。
 - 本仓库使用 npm lockfile，请使用 `npm install` 或 `npm ci`。
 - 默认 macOS DMG 构建需要在 macOS 上执行。
 - 如需签名和公证 macOS 应用，需要自行配置 Apple Developer ID，本仓库默认不包含签名证书。
@@ -62,7 +62,7 @@ git push -u origin main
 Release 标题：
 
 ```text
-Timeboxing 0.1.0
+Timeboxing 1.0.0
 ```
 
 Release notes：
@@ -94,7 +94,7 @@ This document explains how to verify, package, and publish the open-source Timeb
 
 ### Prerequisites
 
-- Node.js 20 or newer is recommended.
+- Node.js 22.13 or newer is recommended.
 - This repository uses an npm lockfile. Use `npm install` or `npm ci`.
 - The default macOS DMG build should be run on macOS.
 - macOS signing and notarization require your own Apple Developer ID. This repository does not include signing certificates.
@@ -148,7 +148,7 @@ If you use a different repository name, update these first:
 Release title:
 
 ```text
-Timeboxing 0.1.0
+Timeboxing 1.0.0
 ```
 
 Release notes:

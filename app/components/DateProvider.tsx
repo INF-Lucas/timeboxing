@@ -27,7 +27,7 @@ export function DateProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({ selectedDate, setDate, goToToday, formatForInput }),
-    [selectedDate, goToToday, formatForInput]
+    [selectedDate, setDate, goToToday, formatForInput]
   );
 
   return <DateContext.Provider value={value}>{children}</DateContext.Provider>;

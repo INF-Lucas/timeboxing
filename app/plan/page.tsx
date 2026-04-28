@@ -2,7 +2,7 @@
 
 import AppLayout from '../components/AppLayout';
 import { useDate } from '../components/DateProvider';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Box, BacklogItem } from '@/lib/types';
 import { getSettings } from '@/lib/actions/settings';
 import {
@@ -16,8 +16,6 @@ import {
   deleteBox,
   splitActiveBox,
   updateBoxMeta,
-  extendBox,
-  updateBoxTimes,
 } from '@/lib/actions/boxes';
 import {
   listBacklog,
@@ -25,7 +23,6 @@ import {
   deleteBacklogItem,
   updateBacklogItem,
 } from '@/lib/actions/backlog';
-import { hasOverlap } from '@/lib/utils/overlap';
 import DayCalendar from '../components/DayCalendar';
 
 export default function PlanPage() {
@@ -115,13 +112,13 @@ function PlanPageContent() {
     () => new Intl.Collator('zh-Hans-u-co-pinyin', { sensitivity: 'base', numeric: true }),
     []
   );
-  function normalizeTitle(t: string) {
+  const normalizeTitle = useCallback((t: string) => {
     return t.trim().replace(/^[\s\-\—_~•\[\](){}<>《》【】「」'"\.,，。、·]+/, '');
-  }
-  function leadingChar(t: string) {
+  }, []);
+  const leadingChar = useCallback((t: string) => {
     const s = normalizeTitle(t);
     return s ? s[0] : '';
-  }
+  }, [normalizeTitle]);
   const viewBacklog = useMemo(() => {
     return [...backlog].sort((a, b) => {
       const la = leadingChar(a.title);
@@ -130,19 +127,8 @@ function PlanPageContent() {
       if (primary !== 0) return primary;
       return collator.compare(a.title, b.title);
     });
-  }, [backlog, collator]);
+  }, [backlog, collator, leadingChar]);
 
-
-  // 延长冲突弹窗状态（属性面板）
-  const [extendConflict, setExtendConflict] = useState(false);
-  const [extendDraft, setExtendDraft] = useState<{
-    boxId: string;
-    title: string;
-    prevStart: Date;
-    prevEnd: Date;
-    nextEnd: Date;
-    minutes: number;
-  } | null>(null);
 
   const selectedDurationMin = useMemo(() => {
     if (!selectedBox) return 0;
@@ -162,6 +148,7 @@ function PlanPageContent() {
   useEffect(() => {
     refreshBacklog();
     refreshDayBoxes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -272,93 +259,6 @@ function PlanPageContent() {
     }
   }
 
-  // 统一冲突检测
-  function hasConflict(start: Date, end: Date, excludeId?: string): boolean {
-    return hasOverlap(start, end, dayBoxes, excludeId);
-  }
-
-  // 快速延长选中盒子的时长（接入冲突弹窗）
-  async function handleExtend(minutes: number) {
-    if (!selectedBox) return;
-    const nextEnd = new Date(selectedBox.end.getTime() + minutes * 60000);
-
-    if (hasConflict(selectedBox.start, nextEnd, selectedBox.id)) {
-      setExtendDraft({
-        boxId: selectedBox.id,
-        title: selectedBox.title,
-        prevStart: selectedBox.start,
-        prevEnd: selectedBox.end,
-        nextEnd,
-        minutes,
-      });
-      setExtendConflict(true);
-      return;
-    }
-
-    setBusy(true);
-    try {
-      await extendBox(selectedBox.id, minutes);
-      await refreshDayBoxes();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function confirmExtend() {
-    if (!extendDraft) return;
-    setBusy(true);
-    try {
-      await extendBox(extendDraft.boxId, extendDraft.minutes);
-      await refreshDayBoxes();
-    } finally {
-      setBusy(false);
-      setExtendConflict(false);
-      setExtendDraft(null);
-    }
-  }
-
-  // 一键解决冲突，移动到下一空窗（以候选结束时间为锚点）
-  async function moveExtendConflictToNextFreeSlot() {
-    if (!extendDraft) return;
-    const duration = Math.round(
-      (extendDraft.nextEnd.getTime() - extendDraft.prevStart.getTime()) / 60000
-    );
-    setBusy(true);
-    try {
-      const slot = await findNextFreeSlot(selectedDate, duration, extendDraft.nextEnd);
-      if (!slot) {
-        alert('今日无可用空窗可解决冲突');
-      } else {
-        await updateBoxTimes(extendDraft.boxId, slot.start, slot.end);
-        await refreshDayBoxes();
-        setExtendConflict(false);
-        setExtendDraft(null);
-      }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function cancelExtend() {
-    setExtendConflict(false);
-    setExtendDraft(null);
-  }
-
-  // 快速缩短选中盒子的时长
-  async function handleShorten(minutes: number) {
-    if (!selectedBox) return;
-    const nextEnd = new Date(selectedBox.end.getTime() - minutes * 60000);
-    if (nextEnd <= selectedBox.start) return;
-
-    setBusy(true);
-    try {
-      await updateBoxTimes(selectedBox.id, selectedBox.start, nextEnd);
-      await refreshDayBoxes();
-    } finally {
-      setBusy(false);
-    }
-  }
-
   // 属性面板：紧急程度（改为 紧急/重要/一般）
   function applyUrgency(level: 'urgent' | 'important' | 'normal') {
     const src = metaTags.split(/\s+/).filter(Boolean);
@@ -426,36 +326,6 @@ function PlanPageContent() {
       await refreshBacklog();
       setNewTitle('');
       setNewEstimateText('30');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // 单项安排到今天
-  async function arrangeItemToToday(item: BacklogItem) {
-    setBusy(true);
-    try {
-      const settings = await getSettings();
-      const anchor = new Date(selectedDate);
-      const [h, m] = settings.workday_start.split(':').map((v) => parseInt(v, 10));
-      anchor.setHours(h, m, 0, 0);
-
-      const minutes = item.estimate_min ?? 30;
-      const slot = await findNextFreeSlot(selectedDate, minutes, anchor);
-      if (!slot) {
-        alert('今日无可用空窗安排该待办');
-        return;
-      }
-      await createBox({
-        title: item.title,
-        start: slot.start,
-        end: slot.end,
-        status: 'planned',
-        tags: Array.isArray(item.tags) ? item.tags : [],
-        notes: item.notes,
-        is_plan_session: false,
-      });
-      await refreshDayBoxes();
     } finally {
       setBusy(false);
     }
@@ -618,6 +488,7 @@ function PlanPageContent() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionRowId, editingBacklogId, backlog]);
 
   return (
@@ -1034,39 +905,6 @@ function PlanPageContent() {
                     </div>
                 </div>
             )}
-
-            {/* 延长冲突弹窗（属性面板） */}
-            {extendConflict && extendDraft ? (
-                <div className="mt-3 border rounded-2xl p-2 bg-rose-50">
-                    <div className="font-medium mb-1">时间冲突</div>
-                    <div className="text-xs text-gray-600 mb-2">
-                        [{extendDraft.title}] {extendDraft.prevStart.toLocaleTimeString()} —{' '}
-                        {extendDraft.nextEnd.toLocaleTimeString()}
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            className="px-2 py-1 text-xs rounded-full bg-blue-600 text-white disabled:opacity-50"
-                            onClick={confirmExtend}
-                            disabled={busy}
-                        >
-                            仍然延长（{extendDraft.minutes}m）
-                        </button>
-                        <button
-                            className="px-2 py-1 text-xs rounded-full bg-gray-200 disabled:opacity-50"
-                            onClick={moveExtendConflictToNextFreeSlot}
-                            disabled={busy}
-                        >
-                            移到下一空窗
-                        </button>
-                        <button
-                            className="px-2 py-1 text-xs rounded-full bg-gray-200"
-                            onClick={cancelExtend}
-                        >
-                            取消
-                        </button>
-                    </div>
-                </div>
-            ) : null}
         </div>
       </div>
       </div>

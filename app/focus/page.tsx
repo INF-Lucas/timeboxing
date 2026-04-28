@@ -67,6 +67,7 @@ function FocusPageContent() {
 
   useEffect(() => {
     refreshBoxes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   const activeBox = useMemo(() => boxes.find((b) => b.status === 'active'), [boxes]);
@@ -280,6 +281,7 @@ function FocusPageContent() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBox, dueBox, nextPlanned, busy, shieldOnActive]);
 
   return (

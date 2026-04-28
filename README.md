@@ -29,6 +29,8 @@ Timeboxing 是一个本地优先的时间盒应用，用于把一天拆成可执
 
 ### 快速开始
 
+推荐使用 Node.js 22.13 或更新版本。
+
 ```bash
 npm install
 npm run dev
@@ -96,7 +98,7 @@ docs/                开源项目文档
 
 ### 技术栈
 
-- Next.js 15
+- Next.js 16
 - React 19
 - TypeScript
 - Dexie / IndexedDB
@@ -152,6 +154,8 @@ This project is inspired by Marc Zao-Sanders' *Timeboxing: The Power of Doing On
 - [Changelog / 更新记录](CHANGELOG.md)
 
 ### Quick Start
+
+Node.js 22.13 or newer is recommended.
 
 ```bash
 npm install
@@ -220,7 +224,7 @@ This repository is an independent open-source version and is maintained separate
 
 ### Stack
 
-- Next.js 15
+- Next.js 16
 - React 19
 - TypeScript
 - Dexie / IndexedDB

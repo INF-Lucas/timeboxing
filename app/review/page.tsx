@@ -44,6 +44,7 @@ function ReviewPageContent() {
 
   useEffect(() => {
     refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate]);
 
   const done = useMemo(() => boxes.filter((b) => b.status === 'done'), [boxes]);
@@ -93,7 +94,7 @@ function ReviewPageContent() {
       await shiftBox(id);
       await refresh();
       showToast('已顺延 1 项');
-    } catch (e) {
+    } catch {
       showToast('顺延失败 1 项');
     } finally {
       setBusy(false);
@@ -109,76 +110,10 @@ function ReviewPageContent() {
       await deleteBox(id);
       await refresh();
       showToast('已删除 1 项');
-    } catch (e) {
+    } catch {
       showToast('删除失败 1 项');
     } finally {
       setBusy(false);
-    }
-  }
-
-  // 状态中文映射
-  function statusLabel(s: Box['status']) {
-    switch (s) {
-      case 'planned':
-        return '已计划';
-      case 'done':
-        return '已完成';
-      case 'active':
-        return '进行中';
-      case 'missed':
-        return '未完成';
-      default:
-        return s;
-    }
-  }
-
-  // 移除：exportCSV 与 copyMarkdownSummary 函数（不再保留）
-  // 导出 CSV
-  async function exportCSV() {
-    const header = ['标题', '状态', '开始', '结束', '分钟', '日期'].join(',');
-    const rows = boxes.map((b) =>
-      [
-        `"${String(b.title).replace(/"/g, '""')}"`,
-        statusLabel(b.status),
-        fmtHM(b.start),
-        fmtHM(b.end),
-        diffMin(b.start, b.end),
-        formatForInput(selectedDate),
-      ].join(',')
-    );
-    const csv = [header, ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `review-${formatForInput(selectedDate)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('已导出 CSV');
-  }
-
-  // 复制 Markdown 摘要
-  async function copyMarkdownSummary() {
-    const head = `# 复盘（${formatForInput(selectedDate)}）\n\n`;
-    const sec = (title: string, data: Box[]) =>
-      data.length === 0
-        ? `## ${title}\n- （无）\n\n`
-        : `## ${title}\n` +
-          data
-            .map((b) => `- ${b.title}（${fmtHM(b.start)} — ${fmtHM(b.end)}，${diffMin(b.start, b.end)} 分钟）`)
-            .join('\n') +
-          '\n\n';
-    const done = boxes.filter((b) => b.status === 'done');
-    const missed = boxes.filter((b) => b.status === 'missed');
-    const planned = boxes.filter((b) => b.status === 'planned');
-    const md = head + sec('已完成', done) + sec('未完成', missed) + sec('已计划', planned);
-    try {
-      await navigator.clipboard.writeText(md);
-      showToast('已复制复盘摘要');
-    } catch {
-      showToast('复制失败');
     }
   }
 
