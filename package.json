@@ -1,0 +1,89 @@
+{
+  "name": "timeboxing-open-source",
+  "version": "0.1.0",
+  "description": "A local-first timeboxing app inspired by Timeboxing by Marc Zao-Sanders.",
+  "private": false,
+  "author": "INF-Lucas",
+  "license": "MIT",
+  "keywords": [
+    "timeboxing",
+    "productivity",
+    "local-first",
+    "electron",
+    "nextjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/INF-Lucas/timeboxing-open-source.git"
+  },
+  "bugs": {
+    "url": "https://github.com/INF-Lucas/timeboxing-open-source/issues"
+  },
+  "homepage": "https://github.com/INF-Lucas/timeboxing-open-source#readme",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "export": "next build",
+    "build-static": "next build",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"ELECTRON_DEV=true ELECTRON_HOST=127.0.0.1 PORT=17895 npm run dev\" \"wait-on http://127.0.0.1:17895 && electron .\"",
+    "electron-build": "npm run build-static && ELECTRON_DEV=false ELECTRON_HOST=127.0.0.1 electron .",
+    "dist": "npm run build-static && electron-builder",
+    "dist-mac-arm64": "npm run build-static && electron-builder --mac --arm64",
+    "dist-mac-x64": "npm run build-static && electron-builder --mac --x64",
+    "dist-mac": "npm run dist-mac-arm64"
+  },
+  "dependencies": {
+    "dexie": "^4.2.1",
+    "next": "15.5.5",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "serve-handler": "^6.1.6"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
+    "electron": "^38.3.0",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.5",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wait-on": "^9.0.1"
+  },
+  "build": {
+    "appId": "io.github.inf-lucas.timeboxing",
+    "productName": "Timeboxing",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "out/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "public/app-icon.icns"
+    },
+    "dmg": {
+      "title": "Timeboxing",
+      "backgroundColor": "#ffffff"
+    }
+  }
+}

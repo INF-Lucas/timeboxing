@@ -1,0 +1,132 @@
+@import "tailwindcss";
+:root {
+  color-scheme: light;
+  /* 浅色模式 - 保持原有设计 */
+  --background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 25%, #7c3aed 50%, #be185d 75%, #dc2626 100%);
+  --foreground: #1e293b;
+  --card-background: #ffffff;
+  --capsule-background: #e2e8f0;
+  --capsule-background-hover: #cbd5e1;
+  --accent-color: #3b82f6;
+  --status-active: #10b981;
+  --status-done: #6b7280;
+  --status-planned: #f59e0b;
+  --status-urgent: #ef4444;
+  --border-color: #e2e8f0;
+  --shadow-light: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  border-radius: 0 !important;
+  overflow: hidden;
+  -webkit-border-radius: 0 !important;
+}
+
+html {
+  color-scheme: light;
+  border-radius: 0 !important;
+  overflow: hidden;
+  -webkit-border-radius: 0 !important;
+}
+
+@layer components {
+  .capsule-ui button { /* 保持你的样式 */ }
+  .capsule-ui button:hover {
+    background: var(--capsule-background-hover);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .capsule-ui input[type='text'],
+  .capsule-ui input[type='number'],
+  .capsule-ui input[type='time'],
+  .capsule-ui input[type='date'],
+  .capsule-ui select {
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light);
+  }
+
+  .capsule-ui input:focus,
+  .capsule-ui select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+  }
+
+  .capsule-ui textarea {
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light);
+  }
+
+  .capsule-ui textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+  }
+
+  /* 常见卡片容器（带边框且有圆角）统一升级为更大的圆角 */
+  .capsule-ui .border.rounded {
+    border-radius: 1rem; /* 16px，相当于 rounded-2xl 的效果 */
+    background: var(--card-background);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-light);
+  }
+
+  /* 状态指示器样式 */
+  .status-active {
+    background-color: var(--status-active);
+    color: white;
+  }
+
+  .status-done {
+    background-color: var(--status-done);
+    color: white;
+  }
+
+  .status-planned {
+    background-color: var(--status-planned);
+    color: white;
+  }
+
+  .status-urgent {
+    background-color: var(--status-urgent);
+    color: white;
+  }
+
+  /* 胶囊卡片样式 */
+  .capsule-card {
+    border-radius: 1rem;
+    transition: all 0.2s;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-light);
+  }
+
+  .capsule-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-1px);
+  }
+
+  /* 隐藏滚动条但保留滚动功能 */
+  .custom-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+}
