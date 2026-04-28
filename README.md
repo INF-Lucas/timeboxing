@@ -1,10 +1,14 @@
-# Timeboxing
+# Timeboxing / 时间盒
 
-一个本地优先的时间盒应用，用于把一天拆成可执行、可复盘的时间块。
+[中文](#中文) | [English](#english)
 
-本项目受 Marc Zao-Sanders 的《Timeboxing: The Power of Doing One Thing at a Time》（中文书名《时间盒》）启发。感谢作者将“把时间放进盒子里，只专注推进一件事”的方法讲清楚。本项目是独立开源实现，不是该书或作者的官方应用。
+## 中文
 
-## 功能
+Timeboxing 是一个本地优先的时间盒应用，用于把一天拆成可执行、可复盘的时间块。
+
+本项目受 Marc Zao-Sanders 的 *Timeboxing: The Power of Doing One Thing at a Time*（中文书名《时间盒》）启发。感谢作者将“把时间放进盒子里，只专注推进一件事”的方法讲清楚。本项目是独立开源实现，不是该书或作者的官方应用。
+
+### 功能
 
 - 计划：维护待办事项，把任务安排到当天空窗。
 - 执行：启动、完成、顺延、分割、延长时间盒。
@@ -13,16 +17,17 @@
 - 本地数据：基于 IndexedDB 存储，支持 JSON 导出、导入和清空。
 - 桌面版：通过 Electron 打包为 macOS 应用。
 
-## 技术栈
+### 文档
 
-- Next.js 15
-- React 19
-- TypeScript
-- Dexie / IndexedDB
-- Tailwind CSS
-- Electron / electron-builder
+- [文档索引 / Docs Index](docs/README.md)
+- [中文用户手册](docs/USER_GUIDE.zh-CN.md)
+- [English User Guide](docs/USER_GUIDE.en.md)
+- [本地存储 / Local Storage](docs/LOCAL_STORAGE.md)
+- [发布说明 / Releasing](docs/RELEASING.md)
+- [贡献指南 / Contributing](CONTRIBUTING.md)
+- [更新记录 / Changelog](CHANGELOG.md)
 
-## 快速开始
+### 快速开始
 
 ```bash
 npm install
@@ -55,7 +60,7 @@ npm run dist-mac
 
 构建产物会输出到 `dist/`，该目录不会提交到 Git。
 
-## 本地存储
+### 本地存储
 
 应用默认使用 IndexedDB，不需要用户配置数据库、账号或服务器。
 
@@ -66,7 +71,7 @@ npm run dist-mac
 
 更多细节见 [docs/LOCAL_STORAGE.md](docs/LOCAL_STORAGE.md)。
 
-## 项目结构
+### 项目结构
 
 ```text
 app/                 Next.js App Router 页面与组件
@@ -79,16 +84,26 @@ public/              应用图标与静态资源
 docs/                开源项目文档
 ```
 
-## 与个人版本的区别
+### 与个人版本的区别
 
 这个仓库是独立的开源版本，和作者本机使用的 macOS 版本分开维护。
 
 - 删除了个人定制的固定时间盒功能。
+- 删除了“AI 探索盒”功能。
 - 使用独立的 Electron session、appId 和 IndexedDB 数据库名。
 - 移除了应用界面中的个人署名文案。
 - 增加了本地数据备份/恢复模块和开源文档。
 
-## 发布到 GitHub
+### 技术栈
+
+- Next.js 15
+- React 19
+- TypeScript
+- Dexie / IndexedDB
+- Tailwind CSS
+- Electron / electron-builder
+
+### 发布到 GitHub
 
 建议流程：
 
@@ -103,10 +118,134 @@ git push -u origin main
 
 如果仓库名称不同，请同步修改 `package.json` 里的 `repository`、`bugs` 和 `homepage`。
 
-## 致谢
+### 致谢
 
-感谢 Marc Zao-Sanders 的《Timeboxing / 时间盒》提供的方法论启发。这个项目尝试把书中的核心思路落到一个本地优先、可修改、可自托管的个人效率工具中。
+感谢 Marc Zao-Sanders 的 *Timeboxing / 时间盒* 提供的方法论启发。这个项目尝试把书中的核心思路落到一个本地优先、可修改、可自托管的个人效率工具中。
 
-## 许可证
+### 许可证
 
 本项目使用 MIT License，详见 [LICENSE](LICENSE)。
+
+## English
+
+Timeboxing is a local-first app for planning a day into clear, executable, reviewable time blocks.
+
+This project is inspired by Marc Zao-Sanders' *Timeboxing: The Power of Doing One Thing at a Time* (published in Chinese as *时间盒*). Thanks to the author for making the timeboxing method practical and easy to understand. This repository is an independent open-source implementation and is not an official app from the book or the author.
+
+### Features
+
+- Plan: manage backlog items and schedule them into available slots.
+- Focus: start, finish, snooze, split, and extend timeboxes.
+- Review: inspect planned, completed, missed, and active work.
+- Settings: configure workday hours, planning duration, and focus shield.
+- Local data: IndexedDB storage with JSON export, import, and reset.
+- Desktop: Electron packaging for macOS.
+
+### Documentation
+
+- [Docs Index / 文档索引](docs/README.md)
+- [中文用户手册](docs/USER_GUIDE.zh-CN.md)
+- [English User Guide](docs/USER_GUIDE.en.md)
+- [Local Storage / 本地存储](docs/LOCAL_STORAGE.md)
+- [Releasing / 发布说明](docs/RELEASING.md)
+- [Contributing / 贡献指南](CONTRIBUTING.md)
+- [Changelog / 更新记录](CHANGELOG.md)
+
+### Quick Start
+
+```bash
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+Run the Electron development app:
+
+```bash
+npm run electron-dev
+```
+
+Build the static frontend:
+
+```bash
+npm run build-static
+```
+
+Build the macOS installer:
+
+```bash
+npm run dist-mac
+```
+
+Build artifacts are written to `dist/`, which is ignored by Git.
+
+### Local Storage
+
+The app uses IndexedDB by default. Users do not need to configure a database, account, or server.
+
+- Database name: `timeboxing_open_source_db`
+- Stored data: timeboxes, backlog items, logs, and settings
+- Backup: `Settings 设置 -> 本地数据 -> 导出 JSON`
+- Restore: `Settings 设置 -> 本地数据 -> 导入 JSON`
+
+See [docs/LOCAL_STORAGE.md](docs/LOCAL_STORAGE.md) for details.
+
+### Project Structure
+
+```text
+app/                 Next.js App Router pages and components
+app/components/      layout, date context, calendar component
+lib/actions/         local data actions
+lib/db.ts            Dexie database definition
+lib/types.ts         core type definitions
+electron/            Electron main process
+public/              app icons and static assets
+docs/                open-source project documentation
+```
+
+### Difference From The Personal Version
+
+This repository is an independent open-source version and is maintained separately from the author's local macOS app.
+
+- Removed personal fixed timebox behavior.
+- Removed the AI exploration box feature.
+- Uses an independent Electron session, appId, and IndexedDB database name.
+- Removes personal signature text from the app UI.
+- Adds local data backup/restore and open-source documentation.
+
+### Stack
+
+- Next.js 15
+- React 19
+- TypeScript
+- Dexie / IndexedDB
+- Tailwind CSS
+- Electron / electron-builder
+
+### Publish To GitHub
+
+Suggested flow:
+
+```bash
+git init
+git add .
+git commit -m "Initial open-source release"
+git branch -M main
+git remote add origin https://github.com/INF-Lucas/timeboxing-open-source.git
+git push -u origin main
+```
+
+If you use a different repository name, update `repository`, `bugs`, and `homepage` in `package.json`.
+
+### Acknowledgements
+
+Thanks to Marc Zao-Sanders' *Timeboxing / 时间盒* for the product idea and methodology. This project turns the book's core ideas into a local-first, modifiable, self-hostable productivity tool.
+
+### License
+
+This project is released under the MIT License. See [LICENSE](LICENSE).
