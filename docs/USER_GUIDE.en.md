@@ -309,7 +309,3 @@ If today has no large enough free slot, snooze searches for available slots up t
 ### Why did a planned item become missed?
 
 The Review page marks planned timeboxes as missed after their end time passes. Newly created boxes have a short grace period and are not marked immediately.
-
-### Does the open-source version include the AI exploration box?
-
-No. The open-source version removes that personal custom feature.

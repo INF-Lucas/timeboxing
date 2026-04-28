@@ -40,7 +40,7 @@ npm run build-static
 - 是否影响用户迁移或备份。
 - 是否需要更新中英文文档。
 
-开源版不包含个人定制的 AI 探索盒功能。如果你想添加 AI 相关能力，请将其设计为可选模块，并在 issue 中先讨论数据流、配置方式和隐私影响。
+如果你想添加 AI 或云端相关能力，请将其设计为可选模块，并在 issue 中先讨论数据流、配置方式和隐私影响。
 
 ### 数据模型
 
@@ -104,7 +104,7 @@ The open-source version stays local-first and does not depend on cloud services 
 - Whether backup or migration behavior changes.
 - Whether Chinese and English documentation must be updated.
 
-The open-source version does not include the personal AI exploration box feature. If you want to add AI-related capabilities, design them as optional modules and discuss data flow, configuration, and privacy impact in an issue first.
+If you want to add AI or cloud-related capabilities, design them as optional modules and discuss data flow, configuration, and privacy impact in an issue first.
 
 ### Data Model
 

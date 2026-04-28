@@ -1,5 +1,5 @@
 {
-  "name": "timeboxing-open-source",
+  "name": "timeboxing",
   "version": "1.0.0",
   "description": "A local-first timeboxing app inspired by Timeboxing by Marc Zao-Sanders.",
   "private": false,
@@ -14,12 +14,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/INF-Lucas/timeboxing-open-source.git"
+    "url": "https://github.com/INF-Lucas/timeboxing.git"
   },
   "bugs": {
-    "url": "https://github.com/INF-Lucas/timeboxing-open-source/issues"
+    "url": "https://github.com/INF-Lucas/timeboxing/issues"
   },
-  "homepage": "https://github.com/INF-Lucas/timeboxing-open-source#readme",
+  "homepage": "https://github.com/INF-Lucas/timeboxing#readme",
   "main": "electron/main.js",
   "scripts": {
     "dev": "next dev --turbopack",

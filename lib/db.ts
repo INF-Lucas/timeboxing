@@ -1,7 +1,7 @@
 import Dexie, { Table } from 'dexie';
 import type { Box, BacklogItem, LogEntry, Settings } from './types';
 
-export const LOCAL_DATABASE_NAME = 'timeboxing_open_source_db';
+export const LOCAL_DATABASE_NAME = 'timeboxing_oss_db';
 export const LOCAL_DATABASE_VERSION = 1;
 
 class TimeboxingDB extends Dexie {

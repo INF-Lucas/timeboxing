@@ -11,14 +11,14 @@ Timeboxing 是本地优先应用。默认不需要后端服务、数据库账号
 应用使用 Dexie 操作浏览器 IndexedDB。
 
 ```text
-数据库名称：timeboxing_open_source_db
+数据库名称：timeboxing_oss_db
 数据库版本：1
 ```
 
 Electron 桌面版使用独立 session partition：
 
 ```text
-persist:timeboxing-open-source
+persist:timeboxing-oss
 ```
 
 这可以让开源版和其他本地版本的数据相互隔离。
@@ -114,14 +114,14 @@ Timeboxing is local-first. It does not require a backend service, database accou
 The app uses Dexie on top of browser IndexedDB.
 
 ```text
-Database name: timeboxing_open_source_db
+Database name: timeboxing_oss_db
 Database version: 1
 ```
 
 The Electron app also uses an isolated session partition:
 
 ```text
-persist:timeboxing-open-source
+persist:timeboxing-oss
 ```
 
 This keeps the open-source version separate from other local builds.

@@ -66,7 +66,7 @@ npm run dist-mac
 
 应用默认使用 IndexedDB，不需要用户配置数据库、账号或服务器。
 
-- 数据库名称：`timeboxing_open_source_db`
+- 数据库名称：`timeboxing_oss_db`
 - 存储内容：时间盒、待办、日志、设置
 - 备份入口：`Settings 设置 -> 本地数据 -> 导出 JSON`
 - 恢复入口：`Settings 设置 -> 本地数据 -> 导入 JSON`
@@ -86,16 +86,6 @@ public/              应用图标与静态资源
 docs/                开源项目文档
 ```
 
-### 与个人版本的区别
-
-这个仓库是独立的开源版本，和作者本机使用的 macOS 版本分开维护。
-
-- 删除了个人定制的固定时间盒功能。
-- 删除了“AI 探索盒”功能。
-- 使用独立的 Electron session、appId 和 IndexedDB 数据库名。
-- 移除了应用界面中的个人署名文案。
-- 增加了本地数据备份/恢复模块和开源文档。
-
 ### 技术栈
 
 - Next.js 16
@@ -114,7 +104,7 @@ git init
 git add .
 git commit -m "Initial open-source release"
 git branch -M main
-git remote add origin https://github.com/INF-Lucas/timeboxing-open-source.git
+git remote add origin https://github.com/INF-Lucas/timeboxing.git
 git push -u origin main
 ```
 
@@ -192,7 +182,7 @@ Build artifacts are written to `dist/`, which is ignored by Git.
 
 The app uses IndexedDB by default. Users do not need to configure a database, account, or server.
 
-- Database name: `timeboxing_open_source_db`
+- Database name: `timeboxing_oss_db`
 - Stored data: timeboxes, backlog items, logs, and settings
 - Backup: `Settings 设置 -> 本地数据 -> 导出 JSON`
 - Restore: `Settings 设置 -> 本地数据 -> 导入 JSON`
@@ -212,16 +202,6 @@ public/              app icons and static assets
 docs/                open-source project documentation
 ```
 
-### Difference From The Personal Version
-
-This repository is an independent open-source version and is maintained separately from the author's local macOS app.
-
-- Removed personal fixed timebox behavior.
-- Removed the AI exploration box feature.
-- Uses an independent Electron session, appId, and IndexedDB database name.
-- Removes personal signature text from the app UI.
-- Adds local data backup/restore and open-source documentation.
-
 ### Stack
 
 - Next.js 16
@@ -240,7 +220,7 @@ git init
 git add .
 git commit -m "Initial open-source release"
 git branch -M main
-git remote add origin https://github.com/INF-Lucas/timeboxing-open-source.git
+git remote add origin https://github.com/INF-Lucas/timeboxing.git
 git push -u origin main
 ```
 
