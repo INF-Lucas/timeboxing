@@ -46,7 +46,7 @@ git init
 git add .
 git commit -m "Initial open-source release"
 git branch -M main
-git remote add origin https://github.com/INF-Lucas/timeboxing.git
+git remote add origin https://github.com/TMT-Lucaaas/timeboxing.git
 git push -u origin main
 ```
 
@@ -131,7 +131,7 @@ git init
 git add .
 git commit -m "Initial open-source release"
 git branch -M main
-git remote add origin https://github.com/INF-Lucas/timeboxing.git
+git remote add origin https://github.com/TMT-Lucaaas/timeboxing.git
 git push -u origin main
 ```
 
